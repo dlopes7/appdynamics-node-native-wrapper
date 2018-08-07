@@ -3,6 +3,11 @@
 
 using namespace v8;
 
+const char *ToCString(const String::Utf8Value &value)
+{
+  return *value ? *value : "<string conversion failed>";
+}
+
 // Hello World Sample
 Handle<Value> Method(const Arguments &args)
 {
@@ -10,14 +15,41 @@ Handle<Value> Method(const Arguments &args)
   return scope.Close(String::New("world"));
 }
 
+// AppDProfile will receive parameters:
+// controllerHostName, controllerPort, controllerSslEnabled, accountName, accountAccessKey, applicationName, tierName, nodeName
 Handle<Value> AppDProfile(const Arguments &args)
 {
   HandleScope scope;
 
-  v8::String::Utf8Value controller_host(args[0]->ToString());
-  std::string controller = std::string(*controller_host);
+  String::Utf8Value v8controllerHostName(args[0]);
+  const char *controllerHostName = ToCString(v8controllerHostName);
 
-  printf("%s", controller.c_str());
+  int controllerPort = args[1]->NumberValue();
+  bool controllerSslEnabled = args[2]->BooleanValue();
+
+  String::Utf8Value v8accountName(args[3]);
+  const char *accountName = ToCString(v8accountName);
+
+  String::Utf8Value v8accountAccessKey(args[4]);
+  const char *accountAccessKey = ToCString(v8accountAccessKey);
+
+  String::Utf8Value v8applicationName(args[5]);
+  const char *applicationName = ToCString(v8applicationName);
+
+  String::Utf8Value v8tierName(args[6]);
+  const char *tierName = ToCString(v8tierName);
+
+  String::Utf8Value v8nodeName(args[7]);
+  const char *nodeName = ToCString(v8nodeName);
+
+  printf("controllerHostName: %s\n", controllerHostName);
+  printf("controllerPort: %d\n", controllerPort);
+  printf("controllerSslEnabled: %s\n", controllerSslEnabled ? "true" : "false");
+  printf("accountName: %s\n", accountName);
+  printf("accountAccessKey: %s\n", accountAccessKey);
+  printf("applicationName: %s\n", applicationName);
+  printf("tierName: %s\n", tierName);
+  printf("nodeName: %s\n", nodeName);
 
   return scope.Close(String::New(""));
 }

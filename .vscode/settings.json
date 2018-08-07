@@ -1,5 +1,17 @@
 {
     "files.associations": {
-        "initializer_list": "cpp"
+        "initializer_list": "cpp",
+        "__bit_reference": "cpp",
+        "__functional_base": "cpp",
+        "algorithm": "cpp",
+        "atomic": "cpp",
+        "deque": "cpp",
+        "functional": "cpp",
+        "iterator": "cpp",
+        "limits": "cpp",
+        "memory": "cpp",
+        "tuple": "cpp",
+        "type_traits": "cpp",
+        "vector": "cpp"
     }
 }
