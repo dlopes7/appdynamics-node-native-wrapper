@@ -3,10 +3,6 @@
 TOOLSET := target
 TARGET := hello
 DEFS_Debug := \
-	'-DNODE_GYP_MODULE_NAME=hello' \
-	'-DUSING_UV_SHARED=1' \
-	'-DUSING_V8_SHARED=1' \
-	'-DV8_DEPRECATION_WARNINGS=1' \
 	'-D_DARWIN_USE_64_BIT_INODE=1' \
 	'-D_LARGEFILE_SOURCE' \
 	'-D_FILE_OFFSET_BITS=64' \
@@ -44,22 +40,14 @@ CFLAGS_OBJC_Debug :=
 CFLAGS_OBJCC_Debug :=
 
 INCS_Debug := \
-	-I/Users/dlopes/.node-gyp/0.10.46/include/node \
 	-I/Users/dlopes/.node-gyp/0.10.46/src \
-	-I/Users/dlopes/.node-gyp/0.10.46/deps/openssl/config \
-	-I/Users/dlopes/.node-gyp/0.10.46/deps/openssl/openssl/include \
 	-I/Users/dlopes/.node-gyp/0.10.46/deps/uv/include \
-	-I/Users/dlopes/.node-gyp/0.10.46/deps/zlib \
 	-I/Users/dlopes/.node-gyp/0.10.46/deps/v8/include \
 	-I/Users/dlopes/Documents/projects/node/appdynamics-node-native-agent/node_modules/node-addon-api/external-napi \
 	-I/Users/dlopes/Documents/projects/node/appdynamics-node-native-agent/node_modules/node-addon-api \
 	-I$(srcdir)/appdynamics-cpp-sdk/include
 
 DEFS_Release := \
-	'-DNODE_GYP_MODULE_NAME=hello' \
-	'-DUSING_UV_SHARED=1' \
-	'-DUSING_V8_SHARED=1' \
-	'-DV8_DEPRECATION_WARNINGS=1' \
 	'-D_DARWIN_USE_64_BIT_INODE=1' \
 	'-D_LARGEFILE_SOURCE' \
 	'-D_FILE_OFFSET_BITS=64' \
@@ -95,12 +83,8 @@ CFLAGS_OBJC_Release :=
 CFLAGS_OBJCC_Release :=
 
 INCS_Release := \
-	-I/Users/dlopes/.node-gyp/0.10.46/include/node \
 	-I/Users/dlopes/.node-gyp/0.10.46/src \
-	-I/Users/dlopes/.node-gyp/0.10.46/deps/openssl/config \
-	-I/Users/dlopes/.node-gyp/0.10.46/deps/openssl/openssl/include \
 	-I/Users/dlopes/.node-gyp/0.10.46/deps/uv/include \
-	-I/Users/dlopes/.node-gyp/0.10.46/deps/zlib \
 	-I/Users/dlopes/.node-gyp/0.10.46/deps/v8/include \
 	-I/Users/dlopes/Documents/projects/node/appdynamics-node-native-agent/node_modules/node-addon-api/external-napi \
 	-I/Users/dlopes/Documents/projects/node/appdynamics-node-native-agent/node_modules/node-addon-api \
@@ -136,28 +120,28 @@ $(obj).$(TOOLSET)/$(TARGET)/%.o: $(obj)/%.cc FORCE_DO_CMD
 # End of this set of suffix rules
 ### Rules for final target.
 LDFLAGS_Debug := \
-	-undefined dynamic_lookup \
 	-Wl,-search_paths_first \
 	-mmacosx-version-min=10.5 \
 	-arch x86_64 \
-	-L$(builddir)
+	-L$(builddir) \
+	-install_name @rpath/hello.node
 
 LIBTOOLFLAGS_Debug := \
-	-undefined dynamic_lookup \
 	-Wl,-search_paths_first
 
 LDFLAGS_Release := \
-	-undefined dynamic_lookup \
 	-Wl,-search_paths_first \
 	-mmacosx-version-min=10.5 \
 	-arch x86_64 \
-	-L$(builddir)
+	-L$(builddir) \
+	-install_name @rpath/hello.node
 
 LIBTOOLFLAGS_Release := \
-	-undefined dynamic_lookup \
 	-Wl,-search_paths_first
 
-LIBS :=
+LIBS := \
+	-undefined dynamic_lookup \
+	/Users/dlopes/Documents/projects/node/appdynamics-node-native-agent/appdynamics-cpp-sdk/lib/libappdynamics.so
 
 $(builddir)/hello.node: GYP_LDFLAGS := $(LDFLAGS_$(BUILDTYPE))
 $(builddir)/hello.node: LIBS := $(LIBS)

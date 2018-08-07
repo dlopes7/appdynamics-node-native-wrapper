@@ -40,24 +40,32 @@ all_deps :=
 
 
 
+# C++ apps need to be linked with g++.
+#
+# Note: flock is used to seralize linking. Linking is a memory-intensive
+# process so running parallel links can often lead to thrashing.  To disable
+# the serialization, override LINK via an envrionment variable as follows:
+#
+#   export LINK=g++
+#
+# This will allow make to invoke N linker processes as specified in -jN.
+LINK ?= ./gyp-mac-tool flock $(builddir)/linker.lock $(CXX.target)
+
 CC.target ?= $(CC)
-CFLAGS.target ?= $(CPPFLAGS) $(CFLAGS)
-CXX.target ?= $(CXX)
-CXXFLAGS.target ?= $(CPPFLAGS) $(CXXFLAGS)
+CFLAGS.target ?= $(CFLAGS)
+CXX.target ?= /usr/bin/g++ -I/Users/dlopes/Documents/projects/c/appdynamics-cpp-sdk/include
+CXXFLAGS.target ?= $(CXXFLAGS)
 LINK.target ?= $(LINK)
 LDFLAGS.target ?= $(LDFLAGS)
 AR.target ?= $(AR)
 
-# C++ apps need to be linked with g++.
-LINK ?= $(CXX.target)
-
 # TODO(evan): move all cross-compilation logic to gyp-time so we don't need
 # to replicate this environment fallback in make as well.
 CC.host ?= gcc
-CFLAGS.host ?= $(CPPFLAGS_host) $(CFLAGS_host)
+CFLAGS.host ?=
 CXX.host ?= g++
-CXXFLAGS.host ?= $(CPPFLAGS_host) $(CXXFLAGS_host)
-LINK.host ?= $(CXX.host)
+CXXFLAGS.host ?=
+LINK.host ?= g++
 LDFLAGS.host ?=
 AR.host ?= ar
 
@@ -167,11 +175,15 @@ cmd_alink = rm -f $@ && ./gyp-mac-tool filter-libtool libtool $(GYP_LIBTOOLFLAGS
 quiet_cmd_link = LINK($(TOOLSET)) $@
 cmd_link = $(LINK.$(TOOLSET)) $(GYP_LDFLAGS) $(LDFLAGS.$(TOOLSET)) -o "$@" $(LD_INPUTS) $(LIBS)
 
+# TODO(thakis): Find out and document the difference between shared_library and
+# loadable_module on mac.
 quiet_cmd_solink = SOLINK($(TOOLSET)) $@
 cmd_solink = $(LINK.$(TOOLSET)) -shared $(GYP_LDFLAGS) $(LDFLAGS.$(TOOLSET)) -o "$@" $(LD_INPUTS) $(LIBS)
 
+# TODO(thakis): The solink_module rule is likely wrong. Xcode seems to pass
+# -bundle -single_module here (for osmesa.so).
 quiet_cmd_solink_module = SOLINK_MODULE($(TOOLSET)) $@
-cmd_solink_module = $(LINK.$(TOOLSET)) -bundle $(GYP_LDFLAGS) $(LDFLAGS.$(TOOLSET)) -o $@ $(filter-out FORCE_DO_CMD, $^) $(LIBS)
+cmd_solink_module = $(LINK.$(TOOLSET)) -shared $(GYP_LDFLAGS) $(LDFLAGS.$(TOOLSET)) -o $@ $(filter-out FORCE_DO_CMD, $^) $(LIBS)
 
 
 # Define an escape_quotes function to escape single quotes.
@@ -326,8 +338,8 @@ ifeq ($(strip $(foreach prefix,$(NO_LOAD),\
 endif
 
 quiet_cmd_regen_makefile = ACTION Regenerating $@
-cmd_regen_makefile = cd $(srcdir); /Users/dlopes/Documents/projects/node/appdynamics-node-native-agent/node_modules/node-gyp/gyp/gyp_main.py -fmake --ignore-environment "--toplevel-dir=." -I/Users/dlopes/Documents/projects/node/appdynamics-node-native-agent/build/config.gypi -I/Users/dlopes/Documents/projects/node/appdynamics-node-native-agent/node_modules/node-gyp/addon.gypi -I/Users/dlopes/.node-gyp/0.10.46/include/node/common.gypi "--depth=." "-Goutput_dir=." "--generator-output=build" "-Dlibrary=shared_library" "-Dvisibility=default" "-Dnode_root_dir=/Users/dlopes/.node-gyp/0.10.46" "-Dnode_gyp_dir=/Users/dlopes/Documents/projects/node/appdynamics-node-native-agent/node_modules/node-gyp" "-Dnode_lib_file=/Users/dlopes/.node-gyp/0.10.46/<(target_arch)/node.lib" "-Dmodule_root_dir=/Users/dlopes/Documents/projects/node/appdynamics-node-native-agent" "-Dnode_engine=v8" binding.gyp
-Makefile: $(srcdir)/../../../../.node-gyp/0.10.46/include/node/common.gypi $(srcdir)/node_modules/node-gyp/addon.gypi $(srcdir)/build/config.gypi $(srcdir)/binding.gyp
+cmd_regen_makefile = /Users/dlopes/Documents/projects/node/appdynamics-node-native-agent/node_modules/node-gyp/gyp/gyp -fmake --ignore-environment "--toplevel-dir=." -I/Users/dlopes/Documents/projects/node/appdynamics-node-native-agent/build/config.gypi -I/Users/dlopes/Documents/projects/node/appdynamics-node-native-agent/node_modules/node-gyp/addon.gypi -I/Users/dlopes/.node-gyp/0.10.46/common.gypi "--depth=." "-Goutput_dir=." "--generator-output=build" "-Dlibrary=shared_library" "-Dvisibility=default" "-Dnode_root_dir=/Users/dlopes/.node-gyp/0.10.46" "-Dmodule_root_dir=/Users/dlopes/Documents/projects/node/appdynamics-node-native-agent" binding.gyp
+Makefile: $(srcdir)/node_modules/node-gyp/addon.gypi $(srcdir)/build/config.gypi $(srcdir)/binding.gyp $(srcdir)/../../../../.node-gyp/0.10.46/common.gypi
 	$(call do_cmd,regen_makefile)
 
 # "all" is a concatenation of the "all" targets from all the included

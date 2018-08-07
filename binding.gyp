@@ -10,6 +10,10 @@
                 "./appdynamics-cpp-sdk/include"
             ],
             'defines': ['NAPI_DISABLE_CPP_EXCEPTIONS'],
+            "link_settings": {
+                "libraries": [
+                    "/Users/dlopes/Documents/projects/node/appdynamics-node-native-agent/appdynamics-cpp-sdk/lib/libappdynamics.so",
+                ]}
         }
     ]
 }

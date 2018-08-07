@@ -51,6 +51,17 @@ Handle<Value> AppDProfile(const Arguments &args)
   printf("tierName: %s\n", tierName);
   printf("nodeName: %s\n", nodeName);
 
+  appd_config *cfg = appd_config_init();
+
+  appd_config_set_app_name(cfg, applicationName);
+  appd_config_set_tier_name(cfg, tierName);
+  appd_config_set_node_name(cfg, nodeName);
+  appd_config_set_controller_host(cfg, controllerHostName);
+  appd_config_set_controller_port(cfg, controllerPort);
+  appd_config_set_controller_account(cfg, accountName);
+  appd_config_set_controller_access_key(cfg, accountAccessKey);
+  appd_config_set_controller_use_ssl(cfg, controllerSslEnabled);
+
   return scope.Close(String::New(""));
 }
 
