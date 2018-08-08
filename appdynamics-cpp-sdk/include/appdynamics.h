@@ -19,6 +19,7 @@ extern "C" {
 
 typedef void* appd_bt_handle;
 typedef void* appd_exitcall_handle;
+typedef void* appd_frame_handle;
 
 #ifdef _WIN32
 #pragma pack(push, 8) /* CORE-65451 */
@@ -744,6 +745,53 @@ APPD_API void appd_custom_metric_report(const char* application_context, const c
                                         long value);
 
 /**
+* This is the language of the current frame (will be expanded in the future).
+*/
+enum appd_frame_type
+{
+  APPD_FRAME_TYPE_CPP = 1
+};
+
+/**
+* Record start of a frame in a call graph that can be reported with a BT.
+* The info is collected only if the BT is snapshotting.
+* This should be called near the start of the method code and must be paired with appd_frame_end
+* when returning from the method.
+* In C++ code please use the Frame class (below).
+* The current implementation collects only frames from one thread for a BT. Subsequent calls from
+* a different thread will be dropped.
+*
+* @param bt
+*     The business transaction for the call graph.
+* @param frame_type
+*     The type of the frame. When used in C or C++ code, use APPD_FRAME_TYPE_CPP.
+* @param class_name
+*     The name of the class if this method is a member of the class, else NULL.
+* @param method_name
+*     The name of the method
+* @param file
+*     The path of the source file.
+* @param line_number
+*     The line number in the source file.
+* @return
+*     An opaque handle for the frame. NULL if an error happened.
+*/
+APPD_API appd_frame_handle appd_frame_begin(appd_bt_handle bt, enum appd_frame_type frame_type,
+              const char* class_name, const char* method_name, const char* file, unsigned int line_number);
+
+/**
+* Record the end of a frame. Must match a corresponding appd_frame_begin.
+* Call this before returning from the method. Note that if exceptions are thrown, you must handle
+* this in your code, otherwise this part of the callgraph will be discarded.
+*
+* @param bt
+*     The business transaction for the call graph.
+* @param frame
+*     The handle of returned by the corresponding appd_frame_begin
+*/
+APPD_API void appd_frame_end(appd_bt_handle bt, appd_frame_handle frame);
+
+/**
  * Terminate the AppDynamics SDK.
  */
 APPD_API void appd_sdk_term();
@@ -1068,9 +1116,95 @@ private:
   std::string correlation_header;
 };
 
+/**
+ * Represents a frame in a call graph that can be reported with a BT.
+ *
+ * Each BT has a stack of active frames. When a Frame object is constructed,
+ * it is pushed onto the BT's stack. The constructed Frame has as its parent
+ * the Frame that was at the top of the stack at the time of its construction.
+ * If the stack was empty when the Frame was created, it is the root of the
+ * BT's call graph and has no parent.
+ *
+ * It is recommended to create these objects on the stack (using the RAII
+ * pattern) and from a single thread.
+ */
+
+class Frame
+{
+public:
+  /**
+  * @param bt
+  *     The BT object that owns this function call
+  * @param frame_type
+  *     The type of the frame. When used in C or C++ code, use APPD_FRAME_TYPE_CPP.
+  * @param class_name
+  *     The name of the class if this method is a member of the class, else NULL.
+  * @param method_name
+  *     The name of the method
+  * @param file
+  *     The path of the source file.
+  * @param line_number
+  *     The line number in the source file.
+  */
+  Frame(BT& bt, appd_frame_type frame_type, const char* class_name, const char* method_name, const char* file, unsigned int line_number)
+    : m_bt(bt)
+  {
+    m_frame_handle = appd_frame_begin(m_bt.handle(), frame_type, class_name, method_name, file, line_number);
+  }
+
+  Frame() = delete;
+  Frame(const Frame&) = delete;
+  Frame& operator=(const Frame&) = delete;
+
+  ~Frame()
+  {
+    appd_frame_end(m_bt.handle(), m_frame_handle);
+  }
+
+private:
+  BT& m_bt;
+  appd_frame_handle m_frame_handle;
+};
+
 }  // namespace sdk
 }  // namespace appd
 
 #endif /* !defined(__cplusplus) */
+
+/**
+ * Frame and callstack helpers.
+ */
+#ifndef __has_attribute
+#define __has_attribute(x) 0
+#endif
+
+#if __STDC_VERSION__ >= 199901L || __cplusplus > 199711L
+#define APPD_FUNCTION_NAME __func__
+#elif __GNUC__ >= 2 || defined(_MSC_VER)
+#define APPD_FUNCTION_NAME __FUNCTION__
+#else
+#define APPD_FUNCTION_NAME "unknown"
+#endif
+
+#if defined(__cplusplus)
+
+#define APPD_AUTO_FRAME(bt) \
+        appd::sdk::Frame __appd_f ## __COUNTER__( \
+                (bt), APPD_FRAME_TYPE_CPP, \
+                nullptr, \
+                APPD_FUNCTION_NAME, \
+                __FILE__, __LINE__)
+
+#elif __has_attribute(cleanup) || __GNUC__ >= 4
+
+#define APPD_AUTO_FRAME(bt) \
+        appd_frame_handle __appd_f ## __COUNTER__ __attribute__((cleanup(appd_frame_end))) = \
+                appd_frame_begin( \
+                    (bt), APPD_FRAME_TYPE_CPP, \
+                    NULL, \
+                    APPD_FUNCTION_NAME, \
+                    __FILE__, __LINE__)
+
+#endif
 
 #endif /* APPDYNAMICS_H_ */

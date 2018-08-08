@@ -4,16 +4,16 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "compile": "node_modules/node-gyp/bin/node-gyp.js rebuild",
-    "start": "node hello.js"
+    "compile": "node-gyp rebuild",
+    "start": "node appd-wrapper-agent.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {},
   "devDependencies": {
-    "bindings": "^1.3.0",
-    "node-addon-api": "^1.4.0",
-    "node-gyp": "^0.10.6",
-    "request": "^2.25.0"
+    "bindings": "1.3.0",
+    "node-addon-api": "1.4.0",
+    "node-gyp": "0.10.6",
+    "request": "2.25.0"
   }
 }
