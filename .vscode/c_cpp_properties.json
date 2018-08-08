@@ -4,7 +4,9 @@
       "name": "Mac",
       "includePath": [
         "${workspaceFolder}/appdynamics-cpp-sdk/**",
-        "${workspaceFolder}/node_modules/**"
+        "${workspaceFolder}/node_modules/**",
+        "C:/Users/Administrator/.node-gyp/0.10.46/include/node/",
+        "C:/Program Files (x86)/Microsoft Visual Studio 14.0/VC/include/**"
       ],
       "defines": [],
       "macFrameworkPath": ["/System/Library/Frameworks", "/Library/Frameworks"],

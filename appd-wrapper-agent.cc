@@ -1,5 +1,6 @@
 #include <node.h>
 #include <appdynamics.h>
+#include <windows.h>
 
 using namespace v8;
 
@@ -61,8 +62,19 @@ Handle<Value> AppDProfile(const Arguments &args)
   appd_config_set_controller_account(cfg, accountName);
   appd_config_set_controller_access_key(cfg, accountAccessKey);
   appd_config_set_controller_use_ssl(cfg, controllerSslEnabled);
+  appd_config_set_logging_min_level(cfg, APPD_LOG_LEVEL_TRACE);
+  appd_config_set_init_timeout_ms(cfg, 60000);
 
-  return scope.Close(String::New(""));
+  int initRC = appd_sdk_init(cfg);
+  return scope.Close(Integer::New(initRC));
+}
+
+Handle<Value> AppDTerminate(const Arguments &args)
+{
+  HandleScope scope;
+  appd_sdk_term();
+
+  return scope.Close(Integer::New(0));
 }
 
 // Register Methods
@@ -73,6 +85,9 @@ void Init(Handle<Object> exports)
 
   exports->Set(String::NewSymbol("profile"),
                FunctionTemplate::New(AppDProfile)->GetFunction());
+
+  exports->Set(String::NewSymbol("terminate"),
+               FunctionTemplate::New(AppDTerminate)->GetFunction());
 }
 
 NODE_MODULE(hello, Init)
