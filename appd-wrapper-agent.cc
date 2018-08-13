@@ -1,4 +1,5 @@
 #include <node.h>
+#include <time.h>
 #include <appdynamics.h>
 #include <windows.h>
 
@@ -21,7 +22,7 @@ Handle<Value> Method(const Arguments &args)
 Handle<Value> AppDProfile(const Arguments &args)
 {
   HandleScope scope;
-
+  srand(time(NULL));
   String::Utf8Value v8controllerHostName(args[0]);
   const char *controllerHostName = ToCString(v8controllerHostName);
 
@@ -65,16 +66,55 @@ Handle<Value> AppDProfile(const Arguments &args)
   appd_config_set_logging_min_level(cfg, APPD_LOG_LEVEL_TRACE);
   appd_config_set_init_timeout_ms(cfg, 60000);
 
+  // This calls initialized the agent
+  // For some reason this seems to keep the process alive until we terminate it
   int initRC = appd_sdk_init(cfg);
   return scope.Close(Integer::New(initRC));
 }
 
+// Terminates the AppDynamics agent
 Handle<Value> AppDTerminate(const Arguments &args)
 {
   HandleScope scope;
   appd_sdk_term();
 
   return scope.Close(Integer::New(0));
+}
+
+Handle<Value> AppDStartBT(const Arguments &args)
+{
+  HandleScope scope;
+
+  String::Utf8Value v8BTName(args[0]);
+  const char *BTName = ToCString(v8BTName);
+
+  String::Utf8Value v8CorrelationHeader(args[1]);
+  const char *CorrelationHeader = ToCString(v8CorrelationHeader);
+
+  appd_bt_handle btHandle = appd_bt_begin(BTName, CorrelationHeader);
+
+  // This is an unique identifier for the BT
+  int num = rand();
+  char guid[20];
+  sprintf(guid, "%d", num);
+
+  appd_bt_store(btHandle, guid);
+
+  return scope.Close(String::New(guid));
+}
+
+Handle<Value> AppDEndBT(const Arguments &args)
+{
+  HandleScope scope;
+
+  String::Utf8Value v8BTID(args[0]);
+  const char *BTID = ToCString(v8BTID);
+
+  appd_bt_handle btHandle = appd_bt_get(BTID);
+
+  appd_bt_end(btHandle);
+
+  return scope.Close(String::New(" "));
 }
 
 // Register Methods
@@ -88,6 +128,12 @@ void Init(Handle<Object> exports)
 
   exports->Set(String::NewSymbol("terminate"),
                FunctionTemplate::New(AppDTerminate)->GetFunction());
+
+  exports->Set(String::NewSymbol("start_bt"),
+               FunctionTemplate::New(AppDStartBT)->GetFunction());
+
+  exports->Set(String::NewSymbol("end_bt"),
+               FunctionTemplate::New(AppDEndBT)->GetFunction());
 }
 
 NODE_MODULE(hello, Init)

@@ -3,10 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "scripts": {
-    "compile": "node-gyp rebuild",
-    "start": "node appd-wrapper-agent.js"
-  },
+  "scripts": {},
   "author": "",
   "license": "ISC",
   "dependencies": {},
