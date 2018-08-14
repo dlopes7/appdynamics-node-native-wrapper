@@ -1,8 +1,8 @@
-var addon = require("bindings")("hello");
+var appd = require("bindings")("hello");
 
-console.log(addon.hello()); // 'world'
+console.log(appd.hello()); // 'world'
 console.log(
-  addon.profile(
+  appd.profile(
     "controllerandeum-davidlopeseumlabdr-qcfxfvsr.srv.ravcloud.com",
     8090,
     false,
@@ -16,17 +16,40 @@ console.log(
 
 console.log("Agente Inicializado");
 
-var btID = addon.start_bt("test_bt1", null);
-console.log("Started BT: " + btID);
-setTimeout(function() {
-  addon.end_bt(btID);
-  console.log("End BT");
-}, 3000);
-//setTimeout(addon.end_bt(btID), 2000);
+appd.appd_backend_declare("HTTP", "Google");
+console.log(
+  appd.appd_backend_set_identifying_property("Google", "HOST", "www.google.com")
+);
+console.log(appd.appd_backend_add("Google"));
 
-var btID = addon.start_bt("test_bt2", null);
-console.log("Started BT: " + btID);
-addon.end_bt(btID);
-addon.terminate();
+for (var i = 0; i < 100; i++) {
+  var btID = appd.start_bt("test_bt1", null);
+  console.log("Started BT: " + btID);
+
+  var waitTill = new Date(new Date().getTime() + 3000);
+  while (waitTill > new Date()) {}
+
+  appd.end_bt(btID);
+  console.log("End BT");
+
+  var btID = appd.start_bt("test_bt2", null);
+  console.log("Started BT: " + btID);
+  var waitTill = new Date(new Date().getTime() + 2000);
+  while (waitTill > new Date()) {}
+
+  var exitCall = appd.appd_exitcall_begin(btID, "Google");
+  var waitTill = new Date(new Date().getTime() + 500);
+  while (waitTill > new Date()) {}
+  appd.appd_exitcall_end(exitCall);
+
+  while (waitTill > new Date()) {}
+
+  appd.end_bt(btID);
+  console.log("End BT");
+
+  appd.end_bt(btID);
+}
+
+appd.terminate();
 
 process.exit();

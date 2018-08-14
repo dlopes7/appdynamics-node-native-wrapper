@@ -117,6 +117,88 @@ Handle<Value> AppDEndBT(const Arguments &args)
   return scope.Close(String::New(" "));
 }
 
+Handle<Value> AppDBackendDeclare(const Arguments &args)
+{
+  HandleScope scope;
+
+  String::Utf8Value v8BackendType(args[0]);
+  const char *backendType = ToCString(v8BackendType);
+
+  String::Utf8Value v8BackendName(args[1]);
+  const char *backendName = ToCString(v8BackendName);
+
+  appd_backend_declare(backendType, backendName);
+
+  return scope.Close(Integer::New(0));
+}
+
+Handle<Value> AppDBackendSetIdentifyingProperty(const Arguments &args)
+{
+  HandleScope scope;
+
+  String::Utf8Value v8Backend(args[0]);
+  const char *backend = ToCString(v8Backend);
+
+  String::Utf8Value v8Property(args[1]);
+  const char *property = ToCString(v8Property);
+
+  String::Utf8Value v8Value(args[2]);
+  const char *value = ToCString(v8Value);
+
+  printf("%s, %s, %s\n", backend, property, value);
+
+  int rc = appd_backend_set_identifying_property(backend, property, value);
+
+  return scope.Close(Integer::New(rc));
+}
+
+Handle<Value> AppDBackendAdd(const Arguments &args)
+{
+  HandleScope scope;
+
+  String::Utf8Value v8Backend(args[0]);
+  const char *backend = ToCString(v8Backend);
+
+  int rc = appd_backend_add(backend);
+
+  return scope.Close(Integer::New(rc));
+}
+
+Handle<Value> AppDExitCallBegin(const Arguments &args)
+{
+  HandleScope scope;
+
+  String::Utf8Value v8BTID(args[0]);
+  const char *BTID = ToCString(v8BTID);
+
+  String::Utf8Value v8Backend(args[1]);
+  const char *backend = ToCString(v8Backend);
+
+  appd_bt_handle bt = appd_bt_get(BTID);
+  appd_exitcall_handle exitCall = appd_exitcall_begin(bt, backend);
+
+  int num = rand();
+  char guid[20];
+  sprintf(guid, "%d", num);
+
+  appd_exitcall_store(exitCall, guid);
+
+  return scope.Close(String::New(guid));
+}
+
+Handle<Value> AppDExitCallEnd(const Arguments &args)
+{
+  HandleScope scope;
+
+  String::Utf8Value v8ExitCallID(args[0]);
+  const char *exitCallID = ToCString(v8ExitCallID);
+
+  appd_exitcall_handle exitCall = appd_exitcall_get(exitCallID);
+  appd_exitcall_end(exitCall);
+
+  return scope.Close(Integer::New(0));
+}
+
 // Register Methods
 void Init(Handle<Object> exports)
 {
@@ -134,6 +216,21 @@ void Init(Handle<Object> exports)
 
   exports->Set(String::NewSymbol("end_bt"),
                FunctionTemplate::New(AppDEndBT)->GetFunction());
+
+  exports->Set(String::NewSymbol("appd_backend_declare"),
+               FunctionTemplate::New(AppDBackendDeclare)->GetFunction());
+
+  exports->Set(String::NewSymbol("appd_backend_set_identifying_property"),
+               FunctionTemplate::New(AppDBackendSetIdentifyingProperty)->GetFunction());
+
+  exports->Set(String::NewSymbol("appd_backend_add"),
+               FunctionTemplate::New(AppDBackendAdd)->GetFunction());
+
+  exports->Set(String::NewSymbol("appd_exitcall_begin"),
+               FunctionTemplate::New(AppDExitCallBegin)->GetFunction());
+
+  exports->Set(String::NewSymbol("appd_exitcall_end"),
+               FunctionTemplate::New(AppDExitCallEnd)->GetFunction());
 }
 
 NODE_MODULE(hello, Init)
