@@ -1,6 +1,6 @@
 var appd = require("bindings")("hello");
 
-export var BACKEND_TYPES = {
+var BACKEND_TYPES = {
   APPD_BACKEND_HTTP: "HTTP",
   APPD_BACKEND_DB: "DB",
   APPD_BACKEND_CACHE: "CACHE",
@@ -10,7 +10,7 @@ export var BACKEND_TYPES = {
   APPD_BACKEND_WEBSPHEREMQ: "WEBSPHERE_MQ"
 };
 
-export function profile(
+function profile(
   controllerHost,
   controllerPort,
   useSSL,
@@ -31,11 +31,11 @@ export function profile(
     nodeName
   );
 }
-export function backendDeclare(backendType, backendName) {
+function backendDeclare(backendType, backendName) {
   appd.appd_backend_declare(backendType, backendName);
 }
 
-export function backendSetIdentifyingProperty(backendName, property, value) {
+function backendSetIdentifyingProperty(backendName, property, value) {
   return appd.appd_backend_set_identifying_property(
     backendName,
     property,
@@ -43,26 +43,37 @@ export function backendSetIdentifyingProperty(backendName, property, value) {
   );
 }
 
-export function backendAdd(backendName) {
+function backendAdd(backendName) {
   return appd.appd_backend_add(backendName);
 }
 
-export function startBT(name, correlationHeader) {
+function startBT(name, correlationHeader) {
   return appd.start_bt(name, correlationHeader);
 }
 
-export function endBT(btID) {
+function endBT(btID) {
   appd.end_bt(btID);
 }
 
-export function exitCallBegin(btID, backendName) {
+function exitCallBegin(btID, backendName) {
   return appd.appd_exitcall_begin(btID, backendName);
 }
 
-export function exitCallEnd(exitCallID) {
+function exitCallEnd(exitCallID) {
   appd.appd_exitcall_end(exitCallID);
 }
 
-export function terminate() {
+function terminate() {
   appd.terminate();
 }
+
+module.exports.BACKEND_TYPES = BACKEND_TYPES;
+module.exports.profile = profile;
+module.exports.backendDeclare = backendDeclare;
+module.exports.backendSetIdentifyingProperty = backendSetIdentifyingProperty;
+module.exports.backendAdd = backendAdd;
+module.exports.startBT = startBT;
+module.exports.endBT = endBT;
+module.exports.exitCallBegin = exitCallBegin;
+module.exports.exitCallEnd = exitCallEnd;
+module.exports.terminate = terminate;
