@@ -1,55 +1,68 @@
 var appd = require("bindings")("hello");
 
-console.log(appd.hello()); // 'world'
-console.log(
+export var BACKEND_TYPES = {
+  APPD_BACKEND_HTTP: "HTTP",
+  APPD_BACKEND_DB: "DB",
+  APPD_BACKEND_CACHE: "CACHE",
+  APPD_BACKEND_RABBITMQ: "RABBITMQ",
+  APPD_BACKEND_WEBSERVICE: "WEBSERVICE",
+  APPD_BACKEND_JMS: "JMS",
+  APPD_BACKEND_WEBSPHEREMQ: "WEBSPHERE_MQ"
+};
+
+export function profile(
+  controllerHost,
+  controllerPort,
+  useSSL,
+  accountName,
+  accessKey,
+  applicationName,
+  tierName,
+  nodeName
+) {
   appd.profile(
-    "controllerandeum-davidlopeseumlabdr-qcfxfvsr.srv.ravcloud.com",
-    8090,
-    false,
-    "customer1",
-    "2b7cbcf6-2a45-4f9b-acb3-1e23c6836767",
-    "NodeC++Wrapper",
-    "wrapper",
-    "david-mac"
-  )
-);
+    controllerHost,
+    controllerPort,
+    useSSL,
+    accountName,
+    accessKey,
+    applicationName,
+    tierName,
+    nodeName
+  );
+}
+export function backendDeclare(backendType, backendName) {
+  appd.appd_backend_declare(backendType, backendName);
+}
 
-console.log("Agente Inicializado");
+export function backendSetIdentifyingProperty(backendName, property, value) {
+  return appd.appd_backend_set_identifying_property(
+    backendName,
+    property,
+    value
+  );
+}
 
-appd.appd_backend_declare("HTTP", "Google");
-console.log(
-  appd.appd_backend_set_identifying_property("Google", "HOST", "www.google.com")
-);
-console.log(appd.appd_backend_add("Google"));
+export function backendAdd(backendName) {
+  return appd.appd_backend_add(backendName);
+}
 
-for (var i = 0; i < 100; i++) {
-  var btID = appd.start_bt("test_bt1", null);
-  console.log("Started BT: " + btID);
+export function startBT(name, correlationHeader) {
+  return appd.start_bt(name, correlationHeader);
+}
 
-  var waitTill = new Date(new Date().getTime() + 3000);
-  while (waitTill > new Date()) {}
-
-  appd.end_bt(btID);
-  console.log("End BT");
-
-  var btID = appd.start_bt("test_bt2", null);
-  console.log("Started BT: " + btID);
-  var waitTill = new Date(new Date().getTime() + 2000);
-  while (waitTill > new Date()) {}
-
-  var exitCall = appd.appd_exitcall_begin(btID, "Google");
-  var waitTill = new Date(new Date().getTime() + 500);
-  while (waitTill > new Date()) {}
-  appd.appd_exitcall_end(exitCall);
-
-  while (waitTill > new Date()) {}
-
-  appd.end_bt(btID);
-  console.log("End BT");
-
+export function endBT(btID) {
   appd.end_bt(btID);
 }
 
-appd.terminate();
+export function exitCallBegin(btID, backendName) {
+  return appd.appd_exitcall_begin(btID, backendName);
+}
 
-process.exit();
+export function exitCallEnd(exitCallID) {
+  appd.appd_exitcall_end(exitCallID);
+}
+
+export function terminate() {
+  appd.terminate();
+}
