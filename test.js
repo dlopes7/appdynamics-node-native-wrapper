@@ -1,5 +1,7 @@
 var appd = require("./appd-wrapper-agent");
 
+const http = require("http");
+
 appd.profile(
   "platform-davidlopessmallcon-gokodoek.srv.ravcloud.com",
   8090,
@@ -19,10 +21,53 @@ appd.backendSetIdentifyingProperty(
 );
 appd.backendAdd("Controller");
 
-for (var i = 0; i < 100; i++) {
+appd.backendDeclare(appd.BACKEND_TYPES.APPD_BACKEND_HTTP, "Hystrix");
+appd.backendSetIdentifyingProperty(
+  "Hystrix",
+  "HOST",
+  "http://platform-davidlopessmallcon-gokodoek.srv.ravcloud.com"
+);
+appd.backendAdd("Hystrix");
+
+for (var i = 0; i < 1; i++) {
   var btID = appd.startBT("test_bt1", null);
   console.log("Started BT: " + btID);
+  var exit = appd.exitCallBegin(btID, "Hystrix");
+  var correlationHeader = appd.exitCallGetCorrelationHeader(exit);
 
+  options = {
+    headers: { singularityheader: correlationHeader },
+    hostname: "platform-davidlopessmallcon-gokodoek.srv.ravcloud.com",
+    port: 8080,
+    method: "GET",
+    path: "/ok"
+  };
+
+  var req = http
+    .request(options, function(resp) {
+      var data = "";
+
+      // A chunk of data has been recieved.
+      resp.on("data", function(chunk) {
+        data += chunk;
+      });
+
+      // The whole response has been received. Print out the result.
+      resp.on("end", function() {
+        console.log(data);
+        appd.exitCallEnd(exit);
+
+        appd.endBT(btID);
+        console.log("End BT: ", btID);
+      });
+    })
+    .on("error", function(err) {
+      console.log("Error: " + err.message);
+    });
+
+  req.end();
+
+  /*
   var waitTill = new Date(new Date().getTime() + 3000);
   while (waitTill > new Date()) {}
 
@@ -43,4 +88,5 @@ for (var i = 0; i < 100; i++) {
 
   appd.endBT(btID);
   console.log("End BT", btID);
+  */
 }

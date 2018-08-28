@@ -67,7 +67,21 @@ function terminate() {
   appd.terminate();
 }
 
-process.stdin.resume(); //so the program will not close instantly
+function exitCallGetCorrelationHeader(exitCallID) {
+  return appd.appd_exitcall_get_correlation_header(exitCallID);
+}
+
+module.exports.BACKEND_TYPES = BACKEND_TYPES;
+module.exports.profile = profile;
+module.exports.backendDeclare = backendDeclare;
+module.exports.backendSetIdentifyingProperty = backendSetIdentifyingProperty;
+module.exports.backendAdd = backendAdd;
+module.exports.startBT = startBT;
+module.exports.endBT = endBT;
+module.exports.exitCallBegin = exitCallBegin;
+module.exports.exitCallEnd = exitCallEnd;
+module.exports.terminate = terminate;
+module.exports.exitCallGetCorrelationHeader = exitCallGetCorrelationHeader;
 
 function noOp() {}
 
@@ -103,14 +117,3 @@ function myCleanup() {
 }
 
 cleanup(myCleanup);
-
-module.exports.BACKEND_TYPES = BACKEND_TYPES;
-module.exports.profile = profile;
-module.exports.backendDeclare = backendDeclare;
-module.exports.backendSetIdentifyingProperty = backendSetIdentifyingProperty;
-module.exports.backendAdd = backendAdd;
-module.exports.startBT = startBT;
-module.exports.endBT = endBT;
-module.exports.exitCallBegin = exitCallBegin;
-module.exports.exitCallEnd = exitCallEnd;
-module.exports.terminate = terminate;

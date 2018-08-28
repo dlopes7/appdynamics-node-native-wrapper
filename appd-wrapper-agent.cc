@@ -199,6 +199,21 @@ Handle<Value> AppDExitCallEnd(const Arguments &args)
   return scope.Close(Integer::New(0));
 }
 
+// appd_exitcall_get_correlation_header
+
+Handle<Value> AppDExitCallGetCorrelationHeader(const Arguments &args)
+{
+  HandleScope scope;
+
+  String::Utf8Value v8ExitCallID(args[0]);
+  const char *exitCallID = ToCString(v8ExitCallID);
+
+  appd_exitcall_handle exitCall = appd_exitcall_get(exitCallID);
+  const char *correlationHeader = appd_exitcall_get_correlation_header(exitCall);
+
+  return scope.Close(String::New(correlationHeader));
+}
+
 // Register Methods
 void Init(Handle<Object> exports)
 {
@@ -231,6 +246,9 @@ void Init(Handle<Object> exports)
 
   exports->Set(String::NewSymbol("appd_exitcall_end"),
                FunctionTemplate::New(AppDExitCallEnd)->GetFunction());
+
+  exports->Set(String::NewSymbol("appd_exitcall_get_correlation_header"),
+               FunctionTemplate::New(AppDExitCallGetCorrelationHeader)->GetFunction());
 }
 
 NODE_MODULE(hello, Init)
