@@ -29,7 +29,7 @@ appd.backendSetIdentifyingProperty(
 );
 appd.backendAdd("Hystrix");
 
-for (var i = 0; i < 1; i++) {
+function doBT() {
   var btID = appd.startBT("test_bt1", null);
   console.log("Started BT: " + btID);
   var exit = appd.exitCallBegin(btID, "Hystrix");
@@ -66,27 +66,8 @@ for (var i = 0; i < 1; i++) {
     });
 
   req.end();
+}
 
-  /*
-  var waitTill = new Date(new Date().getTime() + 3000);
-  while (waitTill > new Date()) {}
-
-  appd.endBT(btID);
-  console.log("End BT", btID);
-
-  var btID = appd.startBT("test_bt2", null);
-  console.log("Started BT: " + btID);
-  var waitTill = new Date(new Date().getTime() + 2000);
-  while (waitTill > new Date()) {}
-
-  var exitCall = appd.exitCallBegin(btID, "Controller");
-  var waitTill = new Date(new Date().getTime() + 500);
-  while (waitTill > new Date()) {}
-  appd.exitCallEnd(exitCall);
-
-  while (waitTill > new Date()) {}
-
-  appd.endBT(btID);
-  console.log("End BT", btID);
-  */
+for (var i = 0; i < 10000; i++) {
+  doBT();
 }

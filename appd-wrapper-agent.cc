@@ -214,6 +214,37 @@ Handle<Value> AppDExitCallGetCorrelationHeader(const Arguments &args)
   return scope.Close(String::New(correlationHeader));
 }
 
+Handle<Value> AppDFrameBegin(const Arguments &args)
+{
+  HandleScope scope;
+
+  // APPD_API appd_frame_handle appd_frame_begin(appd_bt_handle bt, enum appd_frame_type frame_type,
+  // const char* class_name, const char* method_name, const char* file, unsigned int line_number);
+
+  String::Utf8Value v8btID(args[0]);
+  const char *btID = ToCString(v8btID);
+
+  String::Utf8Value v8FrameType(args[1]);
+  const char *frameType = ToCString(v8FrameType);
+
+  String::Utf8Value v8ClassName(args[2]);
+  const char *className = ToCString(v8ClassName);
+
+  String::Utf8Value v8MethodName(args[3]);
+  const char *methodName = ToCString(v8MethodName);
+
+  String::Utf8Value v8File(args[4]);
+  const char *file = ToCString(v8File);
+
+  int lineNumber = args[5]->NumberValue();
+
+  appd_bt_handle btHandle = appd_bt_get(btID);
+
+  appd_frame_handle frameHandle = appd_frame_begin(btHandle, APPD_FRAME_TYPE_CPP, className, methodName, file, lineNumber);
+
+  return scope.Close(String::New(""));
+}
+
 // Register Methods
 void Init(Handle<Object> exports)
 {
