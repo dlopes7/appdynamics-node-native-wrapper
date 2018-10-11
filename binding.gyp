@@ -1,7 +1,7 @@
 {
     "targets": [
         {
-            "target_name": "hello",
+            "target_name": "appd_wrapper_agent",
             "cflags!": ["-fno-exceptions"],
             "cflags_cc!": ["-fno-exceptions"],
             "sources": ["appd-wrapper-agent.cc"],
@@ -19,7 +19,7 @@
          {
          "target_name": "copy_binary",
          "type":"none",
-         "dependencies" : [ "hello" ],
+         "dependencies" : [ "appd_wrapper_agent" ],
          "copies":
          [
             {

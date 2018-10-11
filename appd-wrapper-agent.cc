@@ -246,43 +246,23 @@ Handle<Value> AppDFrameBegin(const Arguments &args)
 }
 
 // Register Methods
-void Init(Handle<Object> exports)
+void Initialize(Local<Object> exports)
 {
-  exports->Set(String::NewSymbol("hello"),
-               FunctionTemplate::New(Method)->GetFunction());
 
-  exports->Set(String::NewSymbol("profile"),
-               FunctionTemplate::New(AppDProfile)->GetFunction());
-
-  exports->Set(String::NewSymbol("terminate"),
-               FunctionTemplate::New(AppDTerminate)->GetFunction());
-
-  exports->Set(String::NewSymbol("start_bt"),
-               FunctionTemplate::New(AppDStartBT)->GetFunction());
-
-  exports->Set(String::NewSymbol("end_bt"),
-               FunctionTemplate::New(AppDEndBT)->GetFunction());
-
-  exports->Set(String::NewSymbol("appd_backend_declare"),
-               FunctionTemplate::New(AppDBackendDeclare)->GetFunction());
-
-  exports->Set(String::NewSymbol("appd_backend_set_identifying_property"),
-               FunctionTemplate::New(AppDBackendSetIdentifyingProperty)->GetFunction());
-
-  exports->Set(String::NewSymbol("appd_backend_add"),
-               FunctionTemplate::New(AppDBackendAdd)->GetFunction());
-
-  exports->Set(String::NewSymbol("appd_exitcall_begin"),
-               FunctionTemplate::New(AppDExitCallBegin)->GetFunction());
-
-  exports->Set(String::NewSymbol("appd_exitcall_end"),
-               FunctionTemplate::New(AppDExitCallEnd)->GetFunction());
-
-  exports->Set(String::NewSymbol("appd_exitcall_get_correlation_header"),
-               FunctionTemplate::New(AppDExitCallGetCorrelationHeader)->GetFunction());
+  NODE_SET_METHOD(exports, "hello", Method);
+  NODE_SET_METHOD(exports, "profile", AppDProfile);
+  NODE_SET_METHOD(exports, "terminate", AppDTerminate);
+  NODE_SET_METHOD(exports, "start_bt", AppDStartBT);
+  NODE_SET_METHOD(exports, "end_bt", AppDEndBT);
+  NODE_SET_METHOD(exports, "appd_backend_declare", AppDBackendDeclare);
+  NODE_SET_METHOD(exports, "appd_backend_set_identifying_property", AppDBackendSetIdentifyingProperty);
+  NODE_SET_METHOD(exports, "appd_backend_add", AppDBackendAdd);
+  NODE_SET_METHOD(exports, "appd_exitcall_begin", AppDExitCallBegin);
+  NODE_SET_METHOD(exports, "appd_exitcall_end", AppDExitCallEnd);
+  NODE_SET_METHOD(exports, "appd_exitcall_get_correlation_header", AppDExitCallGetCorrelationHeader);
 }
 
-NODE_MODULE(hello, Init)
+NODE_MODULE(appd_wrapper_agent, Initialize)
 
 /*
 #include <napi.h>

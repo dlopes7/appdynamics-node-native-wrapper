@@ -1,12 +1,14 @@
 {
-  "name": "appdynamics-node-native-agent",
+  "name": "appdynamics-node-native-wrapper",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {},
   "author": "",
   "license": "ISC",
-  "dependencies": {},
+  "dependencies": {
+    "promise": "^8.0.2"
+  },
   "devDependencies": {
     "bindings": "1.3.0",
     "node-addon-api": "1.4.0",
