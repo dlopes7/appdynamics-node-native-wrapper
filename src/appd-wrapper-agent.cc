@@ -24,24 +24,24 @@ NAN_METHOD(AppDProfile)
   
   const char *controllerHostName = NanToCString(info[0]);
   int controllerPort = info[1]->NumberValue();
-  bool controllerSslEnabled = NanToCString(info[2]);
+  bool controllerSslEnabled = info[2]->BooleanValue();
   const char *accountName = NanToCString(info[3]);;
   const char *accountAccessKey = NanToCString(info[4]);
   const char *applicationName = NanToCString(info[5]);
   const char *tierName =  NanToCString(info[6]);
   const char *nodeName =  NanToCString(info[7]);
 
-    appd_config *cfg = appd_config_init();
+  appd_config *cfg = appd_config_init();
 
-    appd_config_set_app_name(cfg, applicationName);
-    appd_config_set_tier_name(cfg, tierName);
-    appd_config_set_node_name(cfg, nodeName);
-    appd_config_set_controller_host(cfg, controllerHostName);
-    appd_config_set_controller_port(cfg, controllerPort);
-    appd_config_set_controller_account(cfg, accountName);
-    appd_config_set_controller_access_key(cfg, accountAccessKey);
-    appd_config_set_controller_use_ssl(cfg, controllerSslEnabled);
-    appd_config_set_logging_min_level(cfg, APPD_LOG_LEVEL_TRACE);
+  appd_config_set_app_name(cfg, applicationName);
+  appd_config_set_tier_name(cfg, tierName);
+  appd_config_set_node_name(cfg, nodeName);
+  appd_config_set_controller_host(cfg, controllerHostName);
+  appd_config_set_controller_port(cfg, controllerPort);
+  appd_config_set_controller_account(cfg, accountName);
+  appd_config_set_controller_access_key(cfg, accountAccessKey);
+  appd_config_set_controller_use_ssl(cfg, controllerSslEnabled);
+  appd_config_set_logging_min_level(cfg, APPD_LOG_LEVEL_TRACE);
 
   // This calls initializes the agent
   printf("APPDYNAMICS - Initializing the agent asynchronously...\n");
