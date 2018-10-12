@@ -4,10 +4,11 @@
             "target_name": "appd_wrapper_agent",
             "cflags!": ["-fno-exceptions"],
             "cflags_cc!": ["-fno-exceptions"],
-            "sources": ["appd-wrapper-agent.cc"],
+            "sources": ["src/appd-wrapper-agent.cc"],
             "include_dirs": [
                 "<!@(node -p \"require('node-addon-api').include\")",
-                "./appdynamics-cpp-sdk/include"
+                "./appdynamics-cpp-sdk/include",
+                "<!(node -e \"require('nan')\")"
             ],
             "defines": ["NAPI_DISABLE_CPP_EXCEPTIONS"],
             "link_settings": {
