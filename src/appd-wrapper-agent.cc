@@ -30,6 +30,8 @@ NAN_METHOD(AppDProfile)
   const char *applicationName = NanToCString(info[5]);
   const char *tierName =  NanToCString(info[6]);
   const char *nodeName =  NanToCString(info[7]);
+  int logLevel = info[8]->NumberValue();
+  const char *logDirectory = NanToCString(info[9]);
 
   appd_config *cfg = appd_config_init();
 
@@ -41,7 +43,8 @@ NAN_METHOD(AppDProfile)
   appd_config_set_controller_account(cfg, accountName);
   appd_config_set_controller_access_key(cfg, accountAccessKey);
   appd_config_set_controller_use_ssl(cfg, controllerSslEnabled);
-  appd_config_set_logging_min_level(cfg, APPD_LOG_LEVEL_TRACE);
+  appd_config_set_logging_min_level(cfg, appd_config_log_level(logLevel));
+  appd_config_set_logging_log_dir(cfg, logDirectory);
 
   // This calls initializes the agent
   printf("APPDYNAMICS - Initializing the agent asynchronously...\n");

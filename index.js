@@ -11,6 +11,15 @@ var BACKEND_TYPES = {
   APPD_BACKEND_WEBSPHEREMQ: "WEBSPHERE_MQ"
 };
 
+var LOG_LEVELS = {
+  APPD_LOG_LEVEL_TRACE: 0,
+  APPD_LOG_LEVEL_DEBUG: 1,
+  APPD_LOG_LEVEL_INFO: 2,
+  APPD_LOG_LEVEL_WARN: 3,
+  APPD_LOG_LEVEL_ERROR: 4,
+  APPD_LOG_LEVEL_FATAL: 5
+};
+
 
 function appDMiddleware(req, res, next){
 
@@ -34,7 +43,9 @@ function profile(
   accessKey,
   applicationName,
   tierName,
-  nodeName
+  nodeName,
+  logLevel,
+  logDirectory
 ) {
     return appd.profile(
       controllerHost,
@@ -44,7 +55,9 @@ function profile(
       accessKey,
       applicationName,
       tierName,
-      nodeName
+      nodeName,
+      logLevel,
+      logDirectory
     );
 }
 function backendDeclare(backendType, backendName) {
@@ -99,6 +112,7 @@ module.exports.exitCallEnd = exitCallEnd;
 module.exports.terminate = terminate;
 module.exports.exitCallGetCorrelationHeader = exitCallGetCorrelationHeader;
 module.exports.appDMiddleware = appDMiddleware;
+module.exports.LOG_LEVELS = LOG_LEVELS;
 
 function noOp() {}
 
