@@ -14,14 +14,12 @@ var BACKEND_TYPES = {
 
 function appDMiddleware(req, res, next){
 
-  console.log('Starting BT...');
   var singularityHeader = req.headers.singularityheader;
   var btID = startBT(req.path.split('/').splice(0,3).join('/'), singularityHeader);
   req.headers.appd_btID = btID;
 
   res.on('finish', function(){
       endBT(btID);
-      console.log('Finishing BT ' + btID);
   });
 
   next();
