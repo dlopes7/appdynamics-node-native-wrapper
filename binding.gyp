@@ -12,7 +12,7 @@
             "defines": ["NAPI_DISABLE_CPP_EXCEPTIONS"],
             "link_settings": {
                 "libraries": [
-                    "C:/project/node/appdynamics-node-native-wrapper/appdynamics-cpp-sdk/lib/appdynamics.lib",
+                    "<(module_root_dir)/appdynamics-cpp-sdk/lib/appdynamics.lib",
                 ]
             }
         },
