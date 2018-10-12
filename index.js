@@ -11,6 +11,23 @@ var BACKEND_TYPES = {
   APPD_BACKEND_WEBSPHEREMQ: "WEBSPHERE_MQ"
 };
 
+
+function appDMiddleware(req, res, next){
+
+  console.log('Starting BT...');
+  var singularityHeader = req.headers.singularityheader;
+  var btID = startBT(req.path.split('/').splice(0,3).join('/'), singularityHeader);
+  req.headers.appd_btID = btID;
+
+  res.on('finish', function(){
+      endBT(btID);
+      console.log('Finishing BT ' + btID);
+  });
+
+  next();
+
+}
+
 function profile(
   controllerHost,
   controllerPort,
@@ -83,6 +100,7 @@ module.exports.exitCallBegin = exitCallBegin;
 module.exports.exitCallEnd = exitCallEnd;
 module.exports.terminate = terminate;
 module.exports.exitCallGetCorrelationHeader = exitCallGetCorrelationHeader;
+module.exports.appDMiddleware = appDMiddleware;
 
 function noOp() {}
 
