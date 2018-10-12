@@ -11,11 +11,6 @@ using Nan::New;
 using Nan::Set;
 
 
-const char *ToCString(const String::Utf8Value &value)
-{
-  return *value ? *value : "<string conversion failed>";
-}
-
 const char *NanToCString(v8::Local<v8::Value> &value){
   Nan::Utf8String val(value);
   return *val ? *val : "<string conversion failed>";
@@ -36,37 +31,27 @@ NAN_METHOD(AppDProfile)
   const char *tierName =  NanToCString(info[6]);
   const char *nodeName =  NanToCString(info[7]);
 
-  printf("controllerHostName: %s\n", controllerHostName);
-  printf("controllerPort: %d\n", controllerPort);
-  printf("controllerSslEnabled: %s\n", controllerSslEnabled ? "true" : "false");
-  printf("accountName: %s\n", accountName);
-  printf("accountAccessKey: %s\n", accountAccessKey);
-  printf("applicationName: %s\n", applicationName);
-  printf("tierName: %s\n", tierName);
-  printf("nodeName: %s\n", nodeName);
+    appd_config *cfg = appd_config_init();
 
-  appd_config *cfg = appd_config_init();
-
-  appd_config_set_app_name(cfg, applicationName);
-  appd_config_set_tier_name(cfg, tierName);
-  appd_config_set_node_name(cfg, nodeName);
-  appd_config_set_controller_host(cfg, controllerHostName);
-  appd_config_set_controller_port(cfg, controllerPort);
-  appd_config_set_controller_account(cfg, accountName);
-  appd_config_set_controller_access_key(cfg, accountAccessKey);
-  appd_config_set_controller_use_ssl(cfg, controllerSslEnabled);
-  appd_config_set_logging_min_level(cfg, APPD_LOG_LEVEL_TRACE);
-  appd_config_set_init_timeout_ms(cfg, 60000);
+    appd_config_set_app_name(cfg, applicationName);
+    appd_config_set_tier_name(cfg, tierName);
+    appd_config_set_node_name(cfg, nodeName);
+    appd_config_set_controller_host(cfg, controllerHostName);
+    appd_config_set_controller_port(cfg, controllerPort);
+    appd_config_set_controller_account(cfg, accountName);
+    appd_config_set_controller_access_key(cfg, accountAccessKey);
+    appd_config_set_controller_use_ssl(cfg, controllerSslEnabled);
+    appd_config_set_logging_min_level(cfg, APPD_LOG_LEVEL_TRACE);
 
   // This calls initializes the agent
-  // For some reason this seems to keep the process alive until we terminate it
+  printf("APPDYNAMICS - Initializing the agent asynchronously...\n");
   int initRC = appd_sdk_init(cfg);
-  info.GetReturnValue().Set(initRC);
 }
 
 // Terminates the AppDynamics agent
 NAN_METHOD(AppDTerminate)
 {
+  printf("APPDYNAMICS - Terminating the agent...\n");
   appd_sdk_term();
   info.GetReturnValue().Set(0);
 }

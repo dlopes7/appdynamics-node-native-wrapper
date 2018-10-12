@@ -21,8 +21,6 @@ function profile(
   tierName,
   nodeName
 ) {
- // return new Promise(function(resolve, reject) {
-    console.log("Calling init");
     return appd.profile(
       controllerHost,
       controllerPort,
@@ -33,7 +31,6 @@ function profile(
       tierName,
       nodeName
     );
-  //});
 }
 function backendDeclare(backendType, backendName) {
   appd.appd_backend_declare(backendType, backendName);
@@ -116,7 +113,6 @@ cleanup = function(callback) {
 
 //do something when app is closing
 function myCleanup() {
-  console.log("Terminating the AppD Agent...");
   appd.terminate();
 }
 
