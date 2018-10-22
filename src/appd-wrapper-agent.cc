@@ -10,8 +10,8 @@ using Nan::GetFunction;
 using Nan::New;
 using Nan::Set;
 
-
-const char *NanToCString(v8::Local<v8::Value> &value){
+const char *NanToCString(v8::Local<v8::Value> &value)
+{
   Nan::Utf8String val(value);
   return *val ? *val : "<string conversion failed>";
 }
@@ -21,30 +21,24 @@ const char *NanToCString(v8::Local<v8::Value> &value){
 NAN_METHOD(AppDProfile)
 {
   srand(time(NULL));
-  
-  const char *controllerHostName = NanToCString(info[0]);
-  int controllerPort = info[1]->NumberValue();
-  bool controllerSslEnabled = info[2]->BooleanValue();
-  const char *accountName = NanToCString(info[3]);;
-  const char *accountAccessKey = NanToCString(info[4]);
-  const char *applicationName = NanToCString(info[5]);
-  const char *tierName =  NanToCString(info[6]);
-  const char *nodeName =  NanToCString(info[7]);
-  int logLevel = info[8]->NumberValue();
-  const char *logDirectory = NanToCString(info[9]);
 
   appd_config *cfg = appd_config_init();
 
-  appd_config_set_app_name(cfg, applicationName);
-  appd_config_set_tier_name(cfg, tierName);
-  appd_config_set_node_name(cfg, nodeName);
-  appd_config_set_controller_host(cfg, controllerHostName);
-  appd_config_set_controller_port(cfg, controllerPort);
-  appd_config_set_controller_account(cfg, accountName);
-  appd_config_set_controller_access_key(cfg, accountAccessKey);
-  appd_config_set_controller_use_ssl(cfg, controllerSslEnabled);
-  appd_config_set_logging_min_level(cfg, appd_config_log_level(logLevel));
-  appd_config_set_logging_log_dir(cfg, logDirectory);
+  // Controller settings
+  appd_config_set_controller_host(cfg, NanToCString(info[0]));
+  appd_config_set_controller_port(cfg, info[1]->NumberValue());
+  appd_config_set_controller_use_ssl(cfg, info[2]->BooleanValue());
+  appd_config_set_controller_account(cfg, NanToCString(info[3]));
+  appd_config_set_controller_access_key(cfg, NanToCString(info[4]));
+
+  // App Model settings
+  appd_config_set_app_name(cfg, NanToCString(info[5]));
+  appd_config_set_tier_name(cfg, NanToCString(info[6]));
+  appd_config_set_node_name(cfg, NanToCString(info[7]));
+
+  // Log settings
+  appd_config_set_logging_min_level(cfg, appd_config_log_level(int(info[8]->NumberValue())));
+  appd_config_set_logging_log_dir(cfg, NanToCString(info[9]));
 
   // This calls initializes the agent
   printf("APPDYNAMICS - Initializing the agent asynchronously...\n");
@@ -62,10 +56,7 @@ NAN_METHOD(AppDTerminate)
 NAN_METHOD(AppDStartBT)
 {
 
-  const char *BTName = NanToCString(info[0]);
-  const char *CorrelationHeader =NanToCString(info[1]);
-
-  appd_bt_handle btHandle = appd_bt_begin(BTName, CorrelationHeader);
+  appd_bt_handle btHandle = appd_bt_begin(NanToCString(info[0]), NanToCString(info[1]));
 
   // This is an unique identifier for the BT
   int num = rand();
@@ -80,8 +71,7 @@ NAN_METHOD(AppDStartBT)
 NAN_METHOD(AppDEndBT)
 {
 
-  const char *BTID = NanToCString(info[0]);
-  appd_bt_handle btHandle = appd_bt_get(BTID);
+  appd_bt_handle btHandle = appd_bt_get(NanToCString(info[0]));
   appd_bt_end(btHandle);
 
   info.GetReturnValue().Set(String::New(""));
@@ -90,10 +80,7 @@ NAN_METHOD(AppDEndBT)
 NAN_METHOD(AppDBackendDeclare)
 {
 
-  const char *backendType = NanToCString(info[0]);
-  const char *backendName = NanToCString(info[1]);
-
-  appd_backend_declare(backendType, backendName);
+  appd_backend_declare(NanToCString(info[0]), NanToCString(info[1]));
 
   info.GetReturnValue().Set(Integer::New(0));
 }
@@ -101,13 +88,7 @@ NAN_METHOD(AppDBackendDeclare)
 NAN_METHOD(AppDBackendSetIdentifyingProperty)
 {
 
-  const char *backend = NanToCString(info[0]);
-  const char *property = NanToCString(info[1]);
-  const char *value = NanToCString(info[2]);
-
-  printf("%s, %s, %s\n", backend, property, value);
-
-  int rc = appd_backend_set_identifying_property(backend, property, value);
+  int rc = appd_backend_set_identifying_property(NanToCString(info[0]), NanToCString(info[1]), NanToCString(info[2]));
 
   info.GetReturnValue().Set(Integer::New(rc));
 }
@@ -115,8 +96,7 @@ NAN_METHOD(AppDBackendSetIdentifyingProperty)
 NAN_METHOD(AppDBackendAdd)
 {
 
-  const char *backend = NanToCString(info[0]);
-  int rc = appd_backend_add(backend);
+  int rc = appd_backend_add(NanToCString(info[0]));
 
   info.GetReturnValue().Set(Integer::New(rc));
 }
@@ -124,11 +104,8 @@ NAN_METHOD(AppDBackendAdd)
 NAN_METHOD(AppDExitCallBegin)
 {
 
-  const char *BTID = NanToCString(info[0]);
-  const char *backend = NanToCString(info[1]);
-
-  appd_bt_handle bt = appd_bt_get(BTID);
-  appd_exitcall_handle exitCall = appd_exitcall_begin(bt, backend);
+  appd_bt_handle bt = appd_bt_get(NanToCString(info[0]));
+  appd_exitcall_handle exitCall = appd_exitcall_begin(bt, NanToCString(info[1]));
 
   int num = rand();
   char guid[20];
@@ -142,9 +119,7 @@ NAN_METHOD(AppDExitCallBegin)
 NAN_METHOD(AppDExitCallEnd)
 {
 
-  const char *exitCallID = NanToCString(info[0]);
-
-  appd_exitcall_handle exitCall = appd_exitcall_get(exitCallID);
+  appd_exitcall_handle exitCall = appd_exitcall_get(NanToCString(info[0]));
   appd_exitcall_end(exitCall);
 
   info.GetReturnValue().Set(Integer::New(0));
@@ -154,9 +129,7 @@ NAN_METHOD(AppDExitCallEnd)
 NAN_METHOD(AppDExitCallGetCorrelationHeader)
 {
 
-  const char *exitCallID = NanToCString(info[0]);
-
-  appd_exitcall_handle exitCall = appd_exitcall_get(exitCallID);
+  appd_exitcall_handle exitCall = appd_exitcall_get(NanToCString(info[0]));
   const char *correlationHeader = appd_exitcall_get_correlation_header(exitCall);
 
   info.GetReturnValue().Set(String::New(correlationHeader));
@@ -180,37 +153,51 @@ NAN_METHOD(AppDFrameBegin)
   info.GetReturnValue().Set(String::New(""));
 }
 
+// Adds a Detail string to an Exit Call
+NAN_METHOD(AppDDExitCallSetDetails)
+{
+
+  appd_exitcall_handle exitCall = appd_exitcall_get(NanToCString(info[0]));
+  int retCode = appd_exitcall_set_details(exitCall, NanToCString(info[1]));
+
+  info.GetReturnValue().Set(Integer::New(retCode));
+}
+
 // Register Methods
-NAN_MODULE_INIT(initAll){
+NAN_MODULE_INIT(initAll)
+{
   Set(target, New<String>("profile").ToLocalChecked(),
-    GetFunction(New<FunctionTemplate>(AppDProfile)).ToLocalChecked());
+      GetFunction(New<FunctionTemplate>(AppDProfile)).ToLocalChecked());
 
   Set(target, New<String>("terminate").ToLocalChecked(),
-    GetFunction(New<FunctionTemplate>(AppDTerminate)).ToLocalChecked());
+      GetFunction(New<FunctionTemplate>(AppDTerminate)).ToLocalChecked());
 
   Set(target, New<String>("start_bt").ToLocalChecked(),
-    GetFunction(New<FunctionTemplate>(AppDStartBT)).ToLocalChecked());
-  
+      GetFunction(New<FunctionTemplate>(AppDStartBT)).ToLocalChecked());
+
   Set(target, New<String>("end_bt").ToLocalChecked(),
-    GetFunction(New<FunctionTemplate>(AppDEndBT)).ToLocalChecked());
+      GetFunction(New<FunctionTemplate>(AppDEndBT)).ToLocalChecked());
 
   Set(target, New<String>("appd_backend_declare").ToLocalChecked(),
-    GetFunction(New<FunctionTemplate>(AppDBackendDeclare)).ToLocalChecked());
+      GetFunction(New<FunctionTemplate>(AppDBackendDeclare)).ToLocalChecked());
 
   Set(target, New<String>("appd_backend_set_identifying_property").ToLocalChecked(),
-    GetFunction(New<FunctionTemplate>(AppDBackendSetIdentifyingProperty)).ToLocalChecked());
+      GetFunction(New<FunctionTemplate>(AppDBackendSetIdentifyingProperty)).ToLocalChecked());
 
   Set(target, New<String>("appd_backend_add").ToLocalChecked(),
-    GetFunction(New<FunctionTemplate>(AppDBackendAdd)).ToLocalChecked());
+      GetFunction(New<FunctionTemplate>(AppDBackendAdd)).ToLocalChecked());
 
   Set(target, New<String>("appd_exitcall_begin").ToLocalChecked(),
-    GetFunction(New<FunctionTemplate>(AppDExitCallBegin)).ToLocalChecked());
+      GetFunction(New<FunctionTemplate>(AppDExitCallBegin)).ToLocalChecked());
 
   Set(target, New<String>("appd_exitcall_end").ToLocalChecked(),
-    GetFunction(New<FunctionTemplate>(AppDExitCallEnd)).ToLocalChecked());  
+      GetFunction(New<FunctionTemplate>(AppDExitCallEnd)).ToLocalChecked());
 
   Set(target, New<String>("appd_exitcall_get_correlation_header").ToLocalChecked(),
-    GetFunction(New<FunctionTemplate>(AppDExitCallGetCorrelationHeader)).ToLocalChecked());                      
+      GetFunction(New<FunctionTemplate>(AppDExitCallGetCorrelationHeader)).ToLocalChecked());
+
+  Set(target, New<String>("appd_exitcall_set_details").ToLocalChecked(),
+      GetFunction(New<FunctionTemplate>(AppDDExitCallSetDetails)).ToLocalChecked());
 }
 
 // NODE_MODULE(appd_wrapper_agent, Initialize)

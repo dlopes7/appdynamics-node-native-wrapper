@@ -20,19 +20,22 @@ var LOG_LEVELS = {
   APPD_LOG_LEVEL_FATAL: 5
 };
 
-
-function appDMiddleware(req, res, next){
-
+function appDMiddleware(req, res, next) {
   var singularityHeader = req.headers.singularityheader;
-  var btID = startBT(req.path.split('/').splice(0,3).join('/'), singularityHeader);
+  var btID = startBT(
+    req.path
+      .split("/")
+      .splice(0, 3)
+      .join("/"),
+    singularityHeader
+  );
   req.headers.appd_btID = btID;
 
-  res.on('finish', function(){
-      endBT(btID);
+  res.on("finish", function() {
+    endBT(btID);
   });
 
   next();
-
 }
 
 function profile(
@@ -47,18 +50,18 @@ function profile(
   logLevel,
   logDirectory
 ) {
-    return appd.profile(
-      controllerHost,
-      controllerPort,
-      useSSL,
-      accountName,
-      accessKey,
-      applicationName,
-      tierName,
-      nodeName,
-      logLevel,
-      logDirectory
-    );
+  return appd.profile(
+    controllerHost,
+    controllerPort,
+    useSSL,
+    accountName,
+    accessKey,
+    applicationName,
+    tierName,
+    nodeName,
+    logLevel,
+    logDirectory
+  );
 }
 function backendDeclare(backendType, backendName) {
   appd.appd_backend_declare(backendType, backendName);
@@ -100,6 +103,10 @@ function exitCallGetCorrelationHeader(exitCallID) {
   return appd.appd_exitcall_get_correlation_header(exitCallID);
 }
 
+function exitCallSetDetails(exitCallID, details) {
+  return appd.appd_exitcall_set_details(exitCallID, details);
+}
+
 module.exports.BACKEND_TYPES = BACKEND_TYPES;
 module.exports.profile = profile;
 module.exports.backendDeclare = backendDeclare;
@@ -113,6 +120,7 @@ module.exports.terminate = terminate;
 module.exports.exitCallGetCorrelationHeader = exitCallGetCorrelationHeader;
 module.exports.appDMiddleware = appDMiddleware;
 module.exports.LOG_LEVELS = LOG_LEVELS;
+module.exports.exitCallSetDetails = exitCallSetDetails;
 
 function noOp() {}
 
