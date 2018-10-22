@@ -20,6 +20,12 @@ var LOG_LEVELS = {
   APPD_LOG_LEVEL_FATAL: 5
 };
 
+var ERROR_LEVELS = {
+  APPD_LEVEL_NOTICE: 0,
+  APPD_LEVEL_WARNING: 1,
+  APPD_LEVEL_ERROR: 2
+};
+
 function appDMiddleware(req, res, next) {
   var singularityHeader = req.headers.singularityheader;
   var btID = startBT(
@@ -107,6 +113,11 @@ function exitCallSetDetails(exitCallID, details) {
   return appd.appd_exitcall_set_details(exitCallID, details);
 }
 
+function btAddError(btID, errorLevel, message, markBTAsError) {
+  var isError = markBTAsError ? 1 : 0;
+  return appd.appd_bt_add_error(btID, errorLevel, message, isError);
+}
+
 module.exports.BACKEND_TYPES = BACKEND_TYPES;
 module.exports.profile = profile;
 module.exports.backendDeclare = backendDeclare;
@@ -120,7 +131,9 @@ module.exports.terminate = terminate;
 module.exports.exitCallGetCorrelationHeader = exitCallGetCorrelationHeader;
 module.exports.appDMiddleware = appDMiddleware;
 module.exports.LOG_LEVELS = LOG_LEVELS;
+module.exports.ERROR_LEVELS = ERROR_LEVELS;
 module.exports.exitCallSetDetails = exitCallSetDetails;
+module.exports.btAddError = btAddError;
 
 function noOp() {}
 

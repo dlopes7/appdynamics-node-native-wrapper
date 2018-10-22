@@ -154,13 +154,25 @@ NAN_METHOD(AppDFrameBegin)
 }
 
 // Adds a Detail string to an Exit Call
-NAN_METHOD(AppDDExitCallSetDetails)
+NAN_METHOD(AppDExitCallSetDetails)
 {
 
   appd_exitcall_handle exitCall = appd_exitcall_get(NanToCString(info[0]));
   int retCode = appd_exitcall_set_details(exitCall, NanToCString(info[1]));
 
   info.GetReturnValue().Set(Integer::New(retCode));
+}
+
+// Adds a Detail string to an Exit Call
+NAN_METHOD(AppDBTAddError)
+{
+
+  appd_bt_handle bt = appd_bt_get(NanToCString(info[0]));
+
+  // printf("Adding error %d %s %d\n", appd_error_level(int(info[1]->NumberValue())), NanToCString(info[2]), int(info[3]->NumberValue()));
+  appd_bt_add_error(bt, appd_error_level(int(info[1]->NumberValue())), NanToCString(info[2]), int(info[3]->NumberValue()));
+
+  info.GetReturnValue().Set(Integer::New(0));
 }
 
 // Register Methods
@@ -197,7 +209,10 @@ NAN_MODULE_INIT(initAll)
       GetFunction(New<FunctionTemplate>(AppDExitCallGetCorrelationHeader)).ToLocalChecked());
 
   Set(target, New<String>("appd_exitcall_set_details").ToLocalChecked(),
-      GetFunction(New<FunctionTemplate>(AppDDExitCallSetDetails)).ToLocalChecked());
+      GetFunction(New<FunctionTemplate>(AppDExitCallSetDetails)).ToLocalChecked());
+
+  Set(target, New<String>("appd_bt_add_error").ToLocalChecked(),
+      GetFunction(New<FunctionTemplate>(AppDBTAddError)).ToLocalChecked());
 }
 
 // NODE_MODULE(appd_wrapper_agent, Initialize)
