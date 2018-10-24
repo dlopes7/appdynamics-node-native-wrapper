@@ -1,5 +1,4 @@
 var appd = require("bindings")("appd_wrapper_agent");
-var Promise = require("promise");
 
 var BACKEND_TYPES = {
   APPD_BACKEND_HTTP: "HTTP",
